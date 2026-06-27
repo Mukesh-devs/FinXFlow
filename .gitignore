@@ -22,3 +22,4 @@ app/src/main/ic_launcher-playstore.png
 *.keystore
 app/release/
 /.kotlin%   
+app/keystore.jks
