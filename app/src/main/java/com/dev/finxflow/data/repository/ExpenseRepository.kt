@@ -48,6 +48,17 @@ class ExpenseRepository(private val expenseDao: ExpenseDao) {
         )
         expenseDao.insertExpense(expense)
     }
+    /** Current month total for a specific category */
+    fun getCategoryExpense(category: String): Flow<Double> {
+        val start = DateUtils.getStartOfCurrentMonth()
+        val end = DateUtils.getStartOfToday() + 24 * 60 * 60 * 1000
+        return expenseDao.getExpenseSumByCategoryInRange(category, start, end).map { it ?: 0.0 }
+    }
+
+    fun getFoodExpense(): Flow<Double> = getCategoryExpense("Food")
+    fun getTransportExpense(): Flow<Double> = getCategoryExpense("Transport")
+    fun getShoppingExpense(): Flow<Double> = getCategoryExpense("Shopping")
+    fun getOtherExpense(): Flow<Double> = getCategoryExpense("Other")
 
     suspend fun deleteExpense(expense: Expense) = expenseDao.deleteExpense(expense)
 }

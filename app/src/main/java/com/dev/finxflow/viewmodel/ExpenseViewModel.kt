@@ -35,7 +35,10 @@ data class HomeUiState(
     val monthlyExpense: String = "₹ 0.00",
     val currentMonth: String = "",
     val dailyExpense: String = "₹ 0.00",
-    val recentExpenses: List<RecentExpenseUi> = emptyList()
+    val foodExpense: String = "₹ 0.00",      // was "$0.00"
+    val transportExpense: String = "₹ 0.00", // was "$0.00"
+    val shoppingExpense: String = "₹ 0.00",  // was "$0.00"
+    val otherExpense: String = "₹ 0.00"      // was "$0.00"
 )
 
 data class ExpensesUiState(
@@ -57,24 +60,33 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
     private val _expensesUiState = MutableStateFlow(ExpensesUiState())
     val expensesUiState: StateFlow<ExpensesUiState> = _expensesUiState.asStateFlow()
 
+
+
     init {
         val db = AppDatabase.getDatabase(application)
         repository = ExpenseRepository(db.expenseDao())
 
+        // ── Home screen aggregates ──
         // ── Home screen aggregates ──
         viewModelScope.launch {
             combine(
                 repository.getTotalExpense(),
                 repository.getMonthlyExpense(),
                 repository.getDailyExpense(),
-                repository.allExpenses
-            ) { total, monthly, daily, all ->
+                repository.getFoodExpense(),
+                repository.getTransportExpense(),
+                repository.getShoppingExpense(),
+                repository.getOtherExpense()
+            ) { values: Array<Double> ->
                 HomeUiState(
-                    totalExpense = CurrencyUtils.formatAmount(total),
-                    monthlyExpense = CurrencyUtils.formatAmount(monthly),
+                    totalExpense = CurrencyUtils.formatAmount(values[0]),
+                    monthlyExpense = CurrencyUtils.formatAmount(values[1]),
                     currentMonth = DateUtils.getCurrentMonthDisplay(),
-                    dailyExpense = CurrencyUtils.formatAmount(daily),
-                    recentExpenses = all.take(5).map { it.toRecentUi() }
+                    dailyExpense = CurrencyUtils.formatAmount(values[2]),
+                    foodExpense = CurrencyUtils.formatAmount(values[3]),
+                    transportExpense = CurrencyUtils.formatAmount(values[4]),
+                    shoppingExpense = CurrencyUtils.formatAmount(values[5]),
+                    otherExpense = CurrencyUtils.formatAmount(values[6])
                 )
             }.collect { _homeUiState.value = it }
         }

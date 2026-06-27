@@ -28,4 +28,7 @@ interface ExpenseDao {
 
     @Delete
     suspend fun deleteExpense(expense: Expense)
+
+    @Query("SELECT SUM(amount) FROM expenses WHERE category = :category AND date >= :startDate AND date < :endDate")
+    fun getExpenseSumByCategoryInRange(category: String, startDate: Long, endDate: Long): Flow<Double?>
 }

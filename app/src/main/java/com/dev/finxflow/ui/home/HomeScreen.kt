@@ -138,10 +138,19 @@ fun HomeScreen(
 
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
+//            item {
+//                RecentExpensesSection(
+//                    expenses = uiState.recentExpenses,
+//                    onViewAllClick = onViewAllExpensesClick
+//                )
+//            }
+            // ADD this block where the deleted RecentExpensesSection was
             item {
-                RecentExpensesSection(
-                    expenses = uiState.recentExpenses,
-                    onViewAllClick = onViewAllExpensesClick
+                CategoryExpensesSection(
+                    foodAmount = uiState.foodExpense,
+                    transportAmount = uiState.transportExpense,
+                    shoppingAmount = uiState.shoppingExpense,
+                    otherAmount = uiState.otherExpense
                 )
             }
 
@@ -297,6 +306,64 @@ fun StatisticsSection(
             icon = Icons.Default.TrendingUp,
             iconBackground = Color(0xFFF0FDF4)
         )
+    }
+}
+
+@Composable
+fun CategoryExpensesSection(
+    foodAmount: String,
+    transportAmount: String,
+    shoppingAmount: String,
+    otherAmount: String
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            StatCard(
+                modifier = Modifier.weight(1f),
+                title = "Food Expense",
+                amount = foodAmount,
+                subtitle = "This Month",
+                icon = Icons.Outlined.Fastfood,
+                iconBackground = Color(0xFFFFF7ED)
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                title = "Transport",
+                amount = transportAmount,
+                subtitle = "This Month",
+                icon = Icons.Outlined.LocalTaxi,
+                iconBackground = Color(0xFFECFDF5)
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            StatCard(
+                modifier = Modifier.weight(1f),
+                title = "Shopping",
+                amount = shoppingAmount,
+                subtitle = "This Month",
+                icon = Icons.Outlined.LocalGroceryStore,
+                iconBackground = Color(0xFFFEF3C7)
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                title = "Other",
+                amount = otherAmount,
+                subtitle = "This Month",
+                icon = Icons.Outlined.AccountBalanceWallet,
+                iconBackground = Color(0xFFF3F4F6)
+            )
+        }
     }
 }
 
