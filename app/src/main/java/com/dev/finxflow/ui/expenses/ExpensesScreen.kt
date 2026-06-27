@@ -110,75 +110,80 @@ fun ExpensesScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            // Compact curved header
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(IndigoGradientStart, IndigoGradientEnd)
-                        ),
-                        shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp, topStart = 32.dp, topEnd = 32.dp)
-                    )
-                    .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
+                    .background(MaterialTheme.colorScheme.background)
                     .statusBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color.Transparent,
+                    shadowElevation = 6.dp,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(IndigoGradientStart, IndigoGradientEnd)
+                                ),
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
                     ) {
-                        IconButton(onClick = onBackClick) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Back",
-                                tint = Color.White
-                            )
-                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            IconButton(
+                                onClick = onBackClick,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
 
-                        Text(
-                            text = "Expenses",
-                            color = Color.White,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.weight(1f)
-                        )
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "Expenses",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 0.3.sp
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "₹${String.format("%,.2f", uiState.filteredExpenses.sumOf { it.amount })}",
+                                    color = Color.White.copy(alpha = 0.9f),
+                                    fontSize = 22.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = (-0.3).sp
+                                )
+                            }
 
-                        IconButton(onClick = { viewModel.exportToCsv(context) }) {
-                            Icon(
-                                imageVector = Icons.Default.Download,
-                                contentDescription = "Download CSV",
-                                tint = Color.White
-                            )
+                            IconButton(
+                                onClick = { viewModel.exportToCsv(context) },
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Download,
+                                    contentDescription = "Download",
+                                    tint = Color.White,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     }
-
-                    Spacer(modifier = Modifier.height(4.dp))
-
-                    Text(
-                        text = "₹${String.format("%,.2f", uiState.filteredExpenses.sumOf { it.amount })}",
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Text(
-                        text = "Total Spent",
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 13.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }

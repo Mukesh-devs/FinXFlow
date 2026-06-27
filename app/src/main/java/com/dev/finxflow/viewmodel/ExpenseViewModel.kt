@@ -1,125 +1,165 @@
 package com.dev.finxflow.viewmodel
 
+import android.app.Application
 import android.content.Context
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Fastfood
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material.icons.outlined.LocalGroceryStore
-import androidx.compose.material.icons.outlined.LocalTaxi
+import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.Restaurant
+import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.ViewModel
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.dev.finxflow.data.database.AppDatabase
 import com.dev.finxflow.data.model.Expense
+import com.dev.finxflow.data.repository.ExpenseRepository
 import com.dev.finxflow.ui.home.RecentExpenseUi
-import com.dev.finxflow.ui.home.TopCategoryUi
 import com.dev.finxflow.utils.CsvExporter
+import com.dev.finxflow.utils.CurrencyUtils
+import com.dev.finxflow.utils.DateUtils
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Calendar
 
 data class HomeUiState(
-    val totalExpense: String = "₹24,850.00",
-    val monthlyExpense: String = "₹24,850.00",
-    val currentMonth: String = "June 2026",
-    val dailyExpense: String = "₹1,250.00",
-    val recentExpenses: List<RecentExpenseUi> = listOf(
-        RecentExpenseUi("Lunch with Team", "Food & Dining", "₹850", Icons.Outlined.Restaurant, Color(0xFFFF8A65)),
-        RecentExpenseUi("Auto Fare", "Transport", "₹120", Icons.Outlined.LocalTaxi, Color(0xFF4DB6AC)),
-        RecentExpenseUi("Grocery", "Shopping", "₹1,250", Icons.Outlined.LocalGroceryStore, Color(0xFF7986CB)),
-        RecentExpenseUi("Coffee", "Food & Dining", "₹120", Icons.Outlined.Fastfood, Color(0xFF8D6E63))
-    ),
-    val topCategories: List<TopCategoryUi> = listOf(
-        TopCategoryUi("Food & Dining", "₹8,650", 0.34f, Color(0xFFFF8A65)),
-        TopCategoryUi("Transport", "₹4,200", 0.18f, Color(0xFF4DB6AC)),
-        TopCategoryUi("Shopping", "₹6,800", 0.27f, Color(0xFF7986CB))
-    )
+    val totalExpense: String = "₹ 0.00",
+    val monthlyExpense: String = "₹ 0.00",
+    val currentMonth: String = "",
+    val dailyExpense: String = "₹ 0.00",
+    val recentExpenses: List<RecentExpenseUi> = emptyList()
 )
 
 data class ExpensesUiState(
-    val allExpenses: List<Expense> = emptyList(),
     val filteredExpenses: List<Expense> = emptyList(),
     val fromDate: Long? = null,
     val toDate: Long? = null,
-    val selectedCategory: String = "All",
-    val categories: List<String> = listOf("All", "Food & Dining", "Transport", "Shopping", "Groceries", "Entertainment"),
-    val isLoading: Boolean = false,
     val exportMessage: String? = null
 )
 
-class ExpenseViewModel : ViewModel() {
+class ExpenseViewModel(application: Application) : AndroidViewModel(application) {
+
+    private val repository: ExpenseRepository
 
     private val _homeUiState = MutableStateFlow(HomeUiState())
     val homeUiState: StateFlow<HomeUiState> = _homeUiState.asStateFlow()
+
+    private val _dateRange = MutableStateFlow<Pair<Long?, Long?>>(null to null)
 
     private val _expensesUiState = MutableStateFlow(ExpensesUiState())
     val expensesUiState: StateFlow<ExpensesUiState> = _expensesUiState.asStateFlow()
 
     init {
-        loadDemoExpenses()
-    }
+        val db = AppDatabase.getDatabase(application)
+        repository = ExpenseRepository(db.expenseDao())
 
-    private fun loadDemoExpenses() {
-        val cal = Calendar.getInstance()
-        val demo = listOf(
-            Expense(id = 1, name = "Lunch with Team", category = "Food & Dining", amount = 850.0, date = cal.apply { set(2026, 5, 25) }.timeInMillis, description = "Team lunch"),
-            Expense(id = 2, name = "Auto Fare", category = "Transport", amount = 120.0, date = cal.apply { set(2026, 5, 26) }.timeInMillis, description = "Auto to station"),
-            Expense(id = 3, name = "Grocery Shopping", category = "Groceries", amount = 1250.0, date = cal.apply { set(2026, 5, 26) }.timeInMillis, description = "Weekly groceries"),
-            Expense(id = 4, name = "Coffee", category = "Food & Dining", amount = 120.0, date = cal.apply { set(2026, 5, 27) }.timeInMillis, description = "Morning coffee"),
-            Expense(id = 5, name = "Movie Tickets", category = "Entertainment", amount = 600.0, date = cal.apply { set(2026, 5, 20) }.timeInMillis, description = "Weekend movie"),
-            Expense(id = 6, name = "Uber Ride", category = "Transport", amount = 340.0, date = cal.apply { set(2026, 5, 22) }.timeInMillis, description = "Airport pickup"),
-            Expense(id = 7, name = "Dinner Date", category = "Food & Dining", amount = 2100.0, date = cal.apply { set(2026, 5, 23) }.timeInMillis, description = "Anniversary dinner"),
-            Expense(id = 8, name = "New Shoes", category = "Shopping", amount = 4500.0, date = cal.apply { set(2026, 5, 18) }.timeInMillis, description = "Nike running shoes")
-        )
+        // ── Home screen aggregates ──
+        viewModelScope.launch {
+            combine(
+                repository.getTotalExpense(),
+                repository.getMonthlyExpense(),
+                repository.getDailyExpense(),
+                repository.allExpenses
+            ) { total, monthly, daily, all ->
+                HomeUiState(
+                    totalExpense = CurrencyUtils.formatAmount(total),
+                    monthlyExpense = CurrencyUtils.formatAmount(monthly),
+                    currentMonth = DateUtils.getCurrentMonthDisplay(),
+                    dailyExpense = CurrencyUtils.formatAmount(daily),
+                    recentExpenses = all.take(5).map { it.toRecentUi() }
+                )
+            }.collect { _homeUiState.value = it }
+        }
 
-        _expensesUiState.update {
-            it.copy(allExpenses = demo, filteredExpenses = demo)
+        // ── Expenses list (reacts to date range changes) ──
+        viewModelScope.launch {
+            _dateRange.flatMapLatest { (from, to) ->
+                if (from != null && to != null) {
+                    repository.getExpensesByDateRange(from, to)
+                } else {
+                    repository.allExpenses
+                }
+            }.collect { list ->
+                _expensesUiState.update { it.copy(filteredExpenses = list) }
+            }
         }
     }
 
+    /** Call this when the user picks From / To dates in ExpensesScreen */
     fun setDateRange(from: Long?, to: Long?) {
+        _dateRange.value = from to to
         _expensesUiState.update { it.copy(fromDate = from, toDate = to) }
-        applyFilters()
     }
 
-    fun setCategory(category: String) {
-        _expensesUiState.update { it.copy(selectedCategory = category) }
-        applyFilters()
-    }
-
-    private fun applyFilters() {
-        val state = _expensesUiState.value
-        var filtered = state.allExpenses
-
-        if (state.selectedCategory != "All") {
-            filtered = filtered.filter { it.category == state.selectedCategory }
+    /** Call this from AddExpenseScreen on Save */
+    fun saveExpense(
+        amount: String,
+        category: String,
+        date: Long,
+        description: String
+    ) {
+        val amt = amount.toDoubleOrNull() ?: 0.0
+        if (amt <= 0) return
+        viewModelScope.launch {
+            repository.addExpense(
+                amount = amt,
+                category = category,
+                date = date,
+                name = description
+            )
         }
-
-        state.fromDate?.let { from ->
-            filtered = filtered.filter { it.date >= from }
-        }
-
-        state.toDate?.let { to ->
-            filtered = filtered.filter { it.date <= to }
-        }
-
-        _expensesUiState.update { it.copy(filteredExpenses = filtered) }
     }
 
     fun exportToCsv(context: Context) {
         viewModelScope.launch {
-            val path = CsvExporter.export(context, _expensesUiState.value.filteredExpenses)
-            _expensesUiState.update {
-                it.copy(
-                    exportMessage = if (path != null) "CSV saved to Downloads" else "Export failed"
-                )
+            val expenses = _expensesUiState.value.filteredExpenses
+            if (expenses.isEmpty()) {
+                _expensesUiState.update { it.copy(exportMessage = "No expenses to export") }
+                return@launch
             }
+            val msg = CsvExporter.export(context, expenses)
+            _expensesUiState.update { it.copy(exportMessage = msg) }
         }
     }
 
     fun clearExportMessage() {
         _expensesUiState.update { it.copy(exportMessage = null) }
+    }
+
+    // ── Mappers ──
+    private fun Expense.toRecentUi(): RecentExpenseUi {
+        return RecentExpenseUi(
+            name = this.name,
+            category = this.category,
+            amount = CurrencyUtils.formatAmount(this.amount),
+            icon = categoryToIcon(this.category),
+            iconColor = categoryToColor(this.category)
+        )
+    }
+
+    private fun categoryToIcon(category: String): ImageVector = when (category) {
+        "Food", "Food & Dining" -> Icons.Outlined.Restaurant
+        "Transport" -> Icons.Outlined.DirectionsCar
+        "Shopping" -> Icons.Outlined.ShoppingBag
+        "Grocery", "Groceries" -> Icons.Outlined.LocalGroceryStore
+        "Entertainment" -> Icons.Outlined.Movie
+        else -> Icons.Outlined.AccountBalanceWallet
+    }
+
+    private fun categoryToColor(category: String): Color = when (category) {
+        "Food", "Food & Dining" -> Color(0xFFFF8A65)
+        "Transport" -> Color(0xFF4DB6AC)
+        "Shopping" -> Color(0xFF7986CB)
+        "Grocery", "Groceries" -> Color(0xFF8D6E63)
+        "Entertainment" -> Color(0xFFAB47BC)
+        else -> Color(0xFF64748B)
     }
 }

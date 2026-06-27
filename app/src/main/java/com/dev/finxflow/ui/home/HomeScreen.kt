@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -112,7 +113,7 @@ fun HomeScreen(
             contentPadding = PaddingValues(bottom = 32.dp)
         ) {
             item {
-                HomeHeader(userName = "Mukesh")
+                HomeHeader()
             }
 
             item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -153,34 +154,40 @@ fun HomeScreen(
 // HEADER (No notification icon)
 // ==========================================
 @Composable
-fun HomeHeader(
-    userName: String
-) {
-    Box(
+fun HomeHeader() {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(IndigoGradientStart, IndigoGradientEnd)
-                ),
-                shape = RoundedCornerShape(bottomStart = 52.dp, bottomEnd = 52.dp, topStart = 52.dp, topEnd = 52.dp)
-            )
-            .padding(start = 30.dp, end = 24.dp, top = 18.dp, bottom = 18.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        Column {
-            Text(
-                text = "Hello, $userName 👋",
-                color = Color.White.copy(alpha = 0.85f),
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Expense Tracker",
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold
-            )
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = Color.Transparent,
+            shadowElevation = 6.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(IndigoGradientStart, IndigoGradientEnd)
+                        ),
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "FinXFlow",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+            }
         }
     }
 }

@@ -73,8 +73,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dev.finxflow.ui.theme.IndigoGradientEnd
 import com.dev.finxflow.ui.theme.IndigoGradientStart
+import com.dev.finxflow.viewmodel.ExpenseViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -95,6 +97,7 @@ data class CategoryOption(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddExpenseScreen(
+    viewModel: ExpenseViewModel = viewModel(),   // <-- ADD THIS
     onBackClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
@@ -433,7 +436,15 @@ fun AddExpenseScreen(
             // --- Save Button ---
             CompactSaveButton(
                 text = "Save Expense",
-                onClick = onSaveClick,
+                onClick = {
+                    viewModel.saveExpense(
+                        amount = amount,
+                        category = selectedCategory,
+                        date = selectedDate,
+                        description = description
+                    )
+                    onSaveClick()   // navigate back / show toast
+                },
                 modifier = Modifier.fillMaxWidth()
             )
 
