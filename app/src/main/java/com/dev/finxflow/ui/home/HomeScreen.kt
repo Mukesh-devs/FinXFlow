@@ -58,9 +58,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dev.finxflow.ui.theme.IndigoBlue
-import com.dev.finxflow.ui.theme.IndigoGradientEnd
-import com.dev.finxflow.ui.theme.IndigoGradientStart
+import com.dev.finxflow.ui.theme.DividerColor
+import com.dev.finxflow.ui.theme.GradientEnd
+import com.dev.finxflow.ui.theme.GradientStart
+import com.dev.finxflow.ui.theme.PrimaryMain
+import com.dev.finxflow.ui.theme.TextPrimary
+import com.dev.finxflow.ui.theme.TextSecondary
 import com.dev.finxflow.viewmodel.ExpenseViewModel
 import kotlinx.coroutines.delay
 
@@ -106,55 +109,40 @@ fun HomeScreen(
                     animationSpec = tween(700, easing = FastOutSlowInEasing)
                 )
     ) {
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-            contentPadding = PaddingValues(bottom = 32.dp)
+                .background(MaterialTheme.colorScheme.background)
+                .padding(bottom = 32.dp)
         ) {
-            item {
-                HomeHeader()
-            }
+            HomeHeader()
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+            Spacer(modifier = Modifier.height(16.dp))
 
-            item {
-                TotalExpenseCard(
-                    amount = uiState.totalExpense,
-                    subtitle = ""
-                )
-            }
+            TotalExpenseCard(
+                amount = uiState.totalExpense,
+                subtitle = ""
+            )
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+            Spacer(modifier = Modifier.height(16.dp))
 
-            item {
-                StatisticsSection(
-                    monthlyAmount = uiState.monthlyExpense,
-                    monthlyPeriod = uiState.currentMonth,
-                    dailyAmount = uiState.dailyExpense,
-                    dailyPeriod = "Today"
-                )
-            }
+            StatisticsSection(
+                monthlyAmount = uiState.monthlyExpense,
+                monthlyPeriod = uiState.currentMonth,
+                dailyAmount = uiState.dailyExpense,
+                dailyPeriod = "Today"
+            )
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+            Spacer(modifier = Modifier.height(16.dp))
 
-//            item {
-//                RecentExpensesSection(
-//                    expenses = uiState.recentExpenses,
-//                    onViewAllClick = onViewAllExpensesClick
-//                )
-//            }
-            // ADD this block where the deleted RecentExpensesSection was
-            item {
-                CategoryExpensesSection(
-                    foodAmount = uiState.foodExpense,
-                    transportAmount = uiState.transportExpense,
-                    shoppingAmount = uiState.shoppingExpense,
-                    otherAmount = uiState.otherExpense
-                )
-            }
+            CategoryExpensesSection(
+                foodAmount = uiState.foodExpense,
+                transportAmount = uiState.transportExpense,
+                shoppingAmount = uiState.shoppingExpense,
+                otherAmount = uiState.otherExpense
+            )
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -182,7 +170,7 @@ fun HomeHeader() {
                     .fillMaxWidth()
                     .background(
                         brush = Brush.horizontalGradient(
-                            colors = listOf(IndigoGradientStart, IndigoGradientEnd)
+                            colors = listOf(GradientStart, GradientEnd)
                         ),
                         shape = RoundedCornerShape(20.dp)
                     )
@@ -216,7 +204,7 @@ fun TotalExpenseCard(
             .shadow(
                 elevation = 8.dp,
                 shape = RoundedCornerShape(24.dp),
-                spotColor = IndigoBlue.copy(alpha = 0.1f)
+                spotColor = PrimaryMain.copy(alpha = 0.1f)
             ),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -232,21 +220,21 @@ fun TotalExpenseCard(
             Column {
                 Text(
                     text = "Total Expense",
-                    color = Color(0xFF64748B),
+                    color = TextSecondary,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = amount,
-                    color = Color(0xFF1E293B),
+                    color = TextPrimary,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = subtitle,
-                    color = Color(0xFF64748B),
+                    color = TextSecondary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal
                 )
@@ -254,7 +242,7 @@ fun TotalExpenseCard(
 
             Surface(
                 shape = RoundedCornerShape(20.dp),
-                color = IndigoBlue.copy(alpha = 0.1f),
+                color = PrimaryMain.copy(alpha = 0.1f),
                 modifier = Modifier.size(56.dp)
             ) {
                 Box(
@@ -264,7 +252,7 @@ fun TotalExpenseCard(
                     Icon(
                         imageVector = Icons.Outlined.AccountBalanceWallet,
                         contentDescription = "Wallet",
-                        tint = IndigoBlue,
+                        tint = PrimaryMain,
                         modifier = Modifier.size(28.dp)
                     )
                 }
@@ -397,7 +385,7 @@ fun StatCard(
             ) {
                 Text(
                     text = title,
-                    color = Color(0xFF64748B),
+                    color = TextSecondary,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -414,7 +402,7 @@ fun StatCard(
                         Icon(
                             imageVector = icon,
                             contentDescription = null,
-                            tint = IndigoBlue,
+                            tint = PrimaryMain,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -425,7 +413,7 @@ fun StatCard(
 
             Text(
                 text = amount,
-                color = Color(0xFF1E293B),
+                color = TextPrimary,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -434,7 +422,7 @@ fun StatCard(
 
             Text(
                 text = subtitle,
-                color = Color(0xFF64748B),
+                color = TextSecondary,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Normal
             )
@@ -473,18 +461,10 @@ fun RecentExpensesSection(
             ) {
                 Text(
                     text = "Recent Expenses",
-                    color = Color(0xFF1E293B),
+                    color = TextPrimary,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
-
-//                Text(
-//                    text = "View All →",
-//                    color = IndigoBlue,
-//                    fontSize = 14.sp,
-//                    fontWeight = FontWeight.Medium,
-//                    modifier = Modifier.clickable { onViewAllClick() }
-//                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -497,7 +477,7 @@ fun RecentExpensesSection(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(1.dp)
-                            .background(Color(0xFFE2E8F0))
+                            .background(DividerColor)
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -554,14 +534,14 @@ fun ExpenseListItem(expense: RecentExpenseUi) {
 
             Text(
                 text = displayName,
-                color = Color(0xFF1E293B),
+                color = TextPrimary,
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = expense.category,
-                color = Color(0xFF64748B),
+                color = TextSecondary,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Normal
             )
@@ -569,7 +549,7 @@ fun ExpenseListItem(expense: RecentExpenseUi) {
 
         Text(
             text = expense.amount,
-            color = Color(0xFF1E293B),
+            color = TextPrimary,
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )

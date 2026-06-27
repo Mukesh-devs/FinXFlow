@@ -17,74 +17,58 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 // ==========================================
-// COLOR PALETTE
-// ==========================================
-val IndigoPrimary        = Color(0xFF4F46E5)
-val IndigoBlue           = Color(0xFF4F46E5)
-val IndigoGradientStart  = Color(0xFF5B5FF7)
-val IndigoGradientEnd    = Color(0xFF4F46E5)
-val BackgroundLight      = Color(0xFFF5F7FF)
-val SurfaceLight         = Color(0xFFFFFFFF)
-val TextPrimary          = Color(0xFF1E293B)
-val TextSecondary        = Color(0xFF64748B)
-val DividerColor         = Color(0xFFE2E8F0)
-val ProgressTrack        = Color(0xFFE2E8F0)
-val SuccessGreen         = Color(0xFF10B981)
-val ErrorRed             = Color(0xFFEF4444)
-
-// ==========================================
-// LIGHT COLOR SCHEME
+// LIGHT COLOR SCHEME (Midnight Sapphire)
 // ==========================================
 private val LightColorScheme = lightColorScheme(
-    primary               = IndigoPrimary,
+    primary               = PrimaryMain,
     onPrimary             = Color.White,
     primaryContainer      = Color(0xFFEEF2FF),
-    onPrimaryContainer    = IndigoPrimary,
-    secondary             = IndigoGradientStart,
+    onPrimaryContainer    = PrimaryMain,
+    secondary             = PrimaryLight,
     onSecondary           = Color.White,
     secondaryContainer    = Color(0xFFE0E7FF),
-    onSecondaryContainer  = IndigoPrimary,
-    tertiary              = Color(0xFF8B5CF6),
+    onSecondaryContainer  = PrimaryMain,
+    tertiary              = AccentCyan,
     onTertiary            = Color.White,
-    background            = BackgroundLight,
+    background            = BackgroundColor,
     onBackground          = TextPrimary,
-    surface               = SurfaceLight,
+    surface               = SurfaceColor,
     onSurface             = TextPrimary,
     surfaceVariant        = Color(0xFFF1F5F9),
     onSurfaceVariant      = TextSecondary,
     outline               = DividerColor,
     outlineVariant        = DividerColor,
-    error                 = ErrorRed,
+    error                 = DangerRed,
     onError               = Color.White,
     errorContainer        = Color(0xFFFEF2F2),
-    onErrorContainer      = ErrorRed,
+    onErrorContainer      = DangerRed,
     inverseSurface        = TextPrimary,
-    inverseOnSurface      = BackgroundLight,
-    inversePrimary        = Color(0xFFA5B4FC),
-    surfaceTint           = IndigoPrimary,
+    inverseOnSurface      = BackgroundColor,
+    inversePrimary        = PrimaryLight,
+    surfaceTint           = PrimaryMain,
     scrim                 = Color.Black.copy(alpha = 0.32f)
 )
 
 // ==========================================
-// DARK COLOR SCHEME
+// DARK COLOR SCHEME (Midnight Sapphire)
 // ==========================================
 private val DarkColorScheme = darkColorScheme(
-    primary               = Color(0xFFA5B4FC),
-    onPrimary             = Color(0xFF312E81),
-    primaryContainer      = Color(0xFF4338CA),
+    primary               = PrimaryLight,
+    onPrimary             = PrimaryDark,
+    primaryContainer      = Color(0xFF1E3A8A),
     onPrimaryContainer    = Color(0xFFE0E7FF),
-    secondary             = Color(0xFF818CF8),
-    onSecondary           = Color(0xFF312E81),
-    secondaryContainer    = Color(0xFF3730A3),
+    secondary             = Color(0xFF60A5FA),
+    onSecondary           = PrimaryDark,
+    secondaryContainer    = Color(0xFF1E40AF),
     onSecondaryContainer  = Color(0xFFE0E7FF),
-    tertiary              = Color(0xFFC4B5FD),
-    onTertiary            = Color(0xFF4C1D95),
+    tertiary              = Color(0xFF22D3EE),
+    onTertiary            = Color(0xFF0E7490),
     background            = Color(0xFF0F172A),
     onBackground          = Color(0xFFF1F5F9),
     surface               = Color(0xFF1E293B),
     onSurface             = Color(0xFFF1F5F9),
     surfaceVariant        = Color(0xFF334155),
-    onSurfaceVariant      = Color(0xFF94A3B8),
+    onSurfaceVariant      = TextTertiary,
     outline               = Color(0xFF475569),
     outlineVariant        = Color(0xFF475569),
     error                 = Color(0xFFFCA5A5),
@@ -93,8 +77,8 @@ private val DarkColorScheme = darkColorScheme(
     onErrorContainer      = Color(0xFFFEE2E2),
     inverseSurface        = Color(0xFFF1F5F9),
     inverseOnSurface      = Color(0xFF0F172A),
-    inversePrimary        = IndigoPrimary,
-    surfaceTint           = Color(0xFFA5B4FC),
+    inversePrimary        = PrimaryMain,
+    surfaceTint           = PrimaryLight,
     scrim                 = Color.Black.copy(alpha = 0.32f)
 )
 

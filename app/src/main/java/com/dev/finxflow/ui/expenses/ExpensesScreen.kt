@@ -2,7 +2,7 @@ package com.dev.finxflow.ui.expenses
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures   // NEW
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +29,7 @@ import androidx.compose.material.icons.outlined.LocalGroceryStore
 import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.ShoppingBag
-import androidx.compose.material3.AlertDialog   // NEW
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
@@ -61,7 +61,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput   // NEW
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -70,9 +70,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dev.finxflow.data.model.Expense
-import com.dev.finxflow.ui.theme.IndigoBlue
-import com.dev.finxflow.ui.theme.IndigoGradientEnd
-import com.dev.finxflow.ui.theme.IndigoGradientStart
+import com.dev.finxflow.ui.theme.DangerRed
+import com.dev.finxflow.ui.theme.GradientEnd
+import com.dev.finxflow.ui.theme.GradientStart
+import com.dev.finxflow.ui.theme.PrimaryMain
+import com.dev.finxflow.ui.theme.TextPrimary
+import com.dev.finxflow.ui.theme.TextSecondary
+import com.dev.finxflow.ui.theme.TextTertiary
 import com.dev.finxflow.viewmodel.ExpenseViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -103,7 +107,6 @@ fun ExpensesScreen(
     var showFromDatePicker by remember { mutableStateOf(false) }
     var showToDatePicker by remember { mutableStateOf(false) }
 
-    // ── NEW: Delete dialog state ──
     var showDeleteDialog by remember { mutableStateOf(false) }
     var expenseToDelete by remember { mutableStateOf<Expense?>(null) }
 
@@ -135,7 +138,7 @@ fun ExpensesScreen(
                             .fillMaxWidth()
                             .background(
                                 brush = Brush.horizontalGradient(
-                                    colors = listOf(IndigoGradientStart, IndigoGradientEnd)
+                                    colors = listOf(GradientStart, GradientEnd)
                                 ),
                                 shape = RoundedCornerShape(20.dp)
                             )
@@ -146,17 +149,7 @@ fun ExpensesScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-//                            IconButton(
-//                                onClick = onBackClick,
-                                Box(modifier = Modifier.size(32.dp))
-//                            ) {
-//                                Icon(
-//                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-//                                    contentDescription = "Back",
-//                                    tint = Color.White,
-//                                    modifier = Modifier.size(20.dp)
-//                                )
-//                            }
+                            Box(modifier = Modifier.size(32.dp))
 
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally
@@ -201,7 +194,6 @@ fun ExpensesScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            // Modern Date Filter Card
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -209,7 +201,7 @@ fun ExpensesScreen(
                     .shadow(
                         elevation = 8.dp,
                         shape = RoundedCornerShape(24.dp),
-                        spotColor = IndigoBlue.copy(alpha = 0.15f)
+                        spotColor = PrimaryMain.copy(alpha = 0.15f)
                     ),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -220,7 +212,7 @@ fun ExpensesScreen(
                         text = "Date Range",
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E293B)
+                        color = TextPrimary
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -229,7 +221,6 @@ fun ExpensesScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        // From
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -245,21 +236,20 @@ fun ExpensesScreen(
                                     Icon(
                                         Icons.Default.DateRange,
                                         null,
-                                        tint = IndigoBlue,
+                                        tint = PrimaryMain,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 },
                                 shape = RoundedCornerShape(16.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
                                     disabledBorderColor = Color(0xFFE2E8F0),
-                                    disabledLabelColor = Color(0xFF64748B),
-                                    disabledTextColor = Color(0xFF1E293B)
+                                    disabledLabelColor = TextSecondary,
+                                    disabledTextColor = TextPrimary
                                 ),
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
 
-                        // To
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -275,15 +265,15 @@ fun ExpensesScreen(
                                     Icon(
                                         Icons.Default.DateRange,
                                         null,
-                                        tint = IndigoBlue,
+                                        tint = PrimaryMain,
                                         modifier = Modifier.size(20.dp)
                                     )
                                 },
                                 shape = RoundedCornerShape(16.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
                                     disabledBorderColor = Color(0xFFE2E8F0),
-                                    disabledLabelColor = Color(0xFF64748B),
-                                    disabledTextColor = Color(0xFF1E293B)
+                                    disabledLabelColor = TextSecondary,
+                                    disabledTextColor = TextPrimary
                                 ),
                                 modifier = Modifier.fillMaxWidth()
                             )
@@ -292,7 +282,6 @@ fun ExpensesScreen(
                 }
             }
 
-            // List Header ── MODIFIED: added hint subtitle
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -308,18 +297,17 @@ fun ExpensesScreen(
                         text = "Transactions",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1E293B)
+                        color = TextPrimary
                     )
                     Text(
                         text = "Double click to delete",
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Normal,
-                        color = Color(0xFF94A3B8)
+                        color = TextTertiary
                     )
                 }
             }
 
-            // Expenses List
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -332,7 +320,7 @@ fun ExpensesScreen(
                     ExpenseItemCard(
                         expense = expense,
                         dateFormatter = dateFormatter,
-                        onDoubleClick = {          // ── NEW
+                        onDoubleClick = {
                             expenseToDelete = expense
                             showDeleteDialog = true
                         }
@@ -344,7 +332,6 @@ fun ExpensesScreen(
         }
     }
 
-    // ── NEW: Delete Confirmation Dialog ──
     if (showDeleteDialog && expenseToDelete != null) {
         AlertDialog(
             onDismissRequest = {
@@ -355,13 +342,13 @@ fun ExpensesScreen(
                 Text(
                     text = "Delete Expense",
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1E293B)
+                    color = TextPrimary
                 )
             },
             text = {
                 Text(
                     text = "Are you sure you want to delete \"${expenseToDelete?.name}\"?",
-                    color = Color(0xFF64748B)
+                    color = TextSecondary
                 )
             },
             confirmButton = {
@@ -374,7 +361,7 @@ fun ExpensesScreen(
                 ) {
                     Text(
                         text = "Delete",
-                        color = Color(0xFFEF4444),
+                        color = DangerRed,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -386,13 +373,12 @@ fun ExpensesScreen(
                         expenseToDelete = null
                     }
                 ) {
-                    Text("Cancel")
+                    Text("Cancel", color = TextSecondary)
                 }
             }
         )
     }
 
-    // From Date Picker
     if (showFromDatePicker) {
         val pickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.fromDate)
         DatePickerDialog(
@@ -406,12 +392,12 @@ fun ExpensesScreen(
                         showFromDatePicker = false
                     }
                 ) {
-                    Text("OK", color = IndigoBlue, fontWeight = FontWeight.Bold)
+                    Text("OK", color = PrimaryMain, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showFromDatePicker = false }) {
-                    Text("Cancel", color = Color(0xFF64748B))
+                    Text("Cancel", color = TextSecondary)
                 }
             }
         ) {
@@ -419,7 +405,6 @@ fun ExpensesScreen(
         }
     }
 
-    // To Date Picker
     if (showToDatePicker) {
         val pickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.toDate)
         DatePickerDialog(
@@ -433,12 +418,12 @@ fun ExpensesScreen(
                         showToDatePicker = false
                     }
                 ) {
-                    Text("OK", color = IndigoBlue, fontWeight = FontWeight.Bold)
+                    Text("OK", color = PrimaryMain, fontWeight = FontWeight.Bold)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showToDatePicker = false }) {
-                    Text("Cancel", color = Color(0xFF64748B))
+                    Text("Cancel", color = TextSecondary)
                 }
             }
         ) {
@@ -451,7 +436,7 @@ fun ExpensesScreen(
 fun ExpenseItemCard(
     expense: Expense,
     dateFormatter: SimpleDateFormat,
-    onDoubleClick: () -> Unit = {}   // ── NEW parameter
+    onDoubleClick: () -> Unit = {}
 ) {
     val (icon, iconColor) = categoryIcons[expense.category]
         ?: (Icons.Outlined.Fastfood to Color(0xFF64748B))
@@ -459,7 +444,7 @@ fun ExpenseItemCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .pointerInput(Unit) {          // ── NEW: double-tap detector
+            .pointerInput(Unit) {
                 detectTapGestures(
                     onDoubleTap = { onDoubleClick() }
                 )
@@ -503,19 +488,19 @@ fun ExpenseItemCard(
                     text = expense.name,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF1E293B)
+                    color = TextPrimary
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = expense.category,
                     fontSize = 13.sp,
-                    color = Color(0xFF64748B)
+                    color = TextSecondary
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
                     text = dateFormatter.format(Date(expense.date)),
                     fontSize = 12.sp,
-                    color = Color(0xFF94A3B8)
+                    color = TextTertiary
                 )
             }
 
@@ -523,7 +508,7 @@ fun ExpenseItemCard(
                 text = "₹${String.format("%,.2f", expense.amount)}",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color(0xFF1E293B)
+                color = TextPrimary
             )
         }
     }

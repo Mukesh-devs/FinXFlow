@@ -418,7 +418,7 @@ fun FinXFlowApp(
             }
             composable<AddExpenseRoute> {
                 AddExpenseScreen(
-                    onBackClick = { navController.popBackStack() },
+//                    onBackClick = { navController.popBackStack() },
                     onSaveClick = { navController.popBackStack() },
                     onHomeClick = {
                         navController.navigate(HomeRoute) {

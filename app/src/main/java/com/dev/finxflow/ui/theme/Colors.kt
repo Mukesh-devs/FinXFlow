@@ -2,19 +2,45 @@ package com.dev.finxflow.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val NavBarBackground = Color(0xFFFFFFFF)        // white bar surface
-val NavBarHighlight = Color(0x14000000)          // soft dark shading for convex depth on white
-val NavIndicatorStart = Color(0xFF1A1A1A)        // black floating indicator gradient start
-val NavIndicatorEnd = Color(0xFF000000)          // black floating indicator gradient end
-val NavSelectedIcon = Color(0xFFFFFFFF)          // icon color inside the black indicator
-val NavSelectedLabel = Color(0xFF0B0B0D)         // active tab's label (sits on the white bar)
-val NavUnselectedContent = Color(0xFF8E8E93)     // muted icon/label for inactive tabs
-//class Colors {
-//    val NavBarBackground = Color(0xFF0B0B0D)       // near-black bar surface
-//    val NavBarHighlight = Color(0x1AFFFFFF)        // subtle top sheen (convex feel)
-//    val NavIndicatorStart = Color(0xFFFFFFFF)      // floating indicator gradient start
-//    val NavIndicatorEnd = Color(0xFFF0F0F2)        // floating indicator gradient end
-//    val NavSelectedIcon = Color(0xFF0B0B0D)        // icon color inside the white indicator
-//    val NavSelectedLabel = Color(0xFFFFFFFF)       // active tab's label color
-//    val NavUnselectedContent = Color(0xFF8E8E93)   // muted icon/label for inactive tabs
-//}
+// ==========================================
+// BRAND PRIMARY (Midnight Sapphire)
+// ==========================================
+val PrimaryDark       = Color(0xFF0F172A)
+val PrimaryMain       = Color(0xFF1E3A8A)
+val PrimaryLight      = Color(0xFF3B82F6)
+val AccentCyan        = Color(0xFF06B6D4)
+
+// ==========================================
+// GRADIENTS (Used by Home, Expenses, Add screens)
+// ==========================================
+val GradientStart     = Color(0xFF1E3A8A)
+val GradientEnd       = Color(0xFF06B6D4)
+val GradientMid       = Color(0xFF2563EB)
+
+// ==========================================
+// SEMANTIC / FINANCE
+// ==========================================
+val SuccessGreen      = Color(0xFF10B981)
+val DangerRed         = Color(0xFFEF4444)
+val WarningAmber      = Color(0xFFF59E0B)
+
+// ==========================================
+// NEUTRALS (Replace hardcoded grays in screens)
+// ==========================================
+val TextPrimary       = Color(0xFF0F172A)
+val TextSecondary     = Color(0xFF475569)
+val TextTertiary      = Color(0xFF94A3B8)
+val DividerColor      = Color(0xFFE2E8F0)
+val SurfaceColor      = Color(0xFFFFFFFF)
+val BackgroundColor   = Color(0xFFF8FAFC)
+
+// ==========================================
+// BOTTOM NAVIGATION (White bar + Sapphire indicator)
+// ==========================================
+val NavBarBackground     = Color(0xFFFFFFFF)
+val NavBarHighlight      = Color(0x14000000)
+val NavIndicatorStart    = Color(0xFF1E3A8A)
+val NavIndicatorEnd      = Color(0xFF2563EB)
+val NavSelectedIcon      = Color(0xFFFFFFFF)
+val NavSelectedLabel     = Color(0xFF1E3A8A)
+val NavUnselectedContent = Color(0xFF94A3B8)

@@ -75,8 +75,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.dev.finxflow.ui.theme.IndigoGradientEnd
-import com.dev.finxflow.ui.theme.IndigoGradientStart
+import com.dev.finxflow.ui.theme.DangerRed
+import com.dev.finxflow.ui.theme.DividerColor
+import com.dev.finxflow.ui.theme.GradientEnd
+import com.dev.finxflow.ui.theme.GradientStart
+import com.dev.finxflow.ui.theme.PrimaryMain
+import com.dev.finxflow.ui.theme.TextPrimary
+import com.dev.finxflow.ui.theme.TextSecondary
+import com.dev.finxflow.ui.theme.TextTertiary
 import com.dev.finxflow.viewmodel.ExpenseViewModel
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -98,7 +104,7 @@ data class CategoryOption(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddExpenseScreen(
-    viewModel: ExpenseViewModel = viewModel(),   // <-- ADD THIS
+    viewModel: ExpenseViewModel = viewModel(),
     onBackClick: () -> Unit = {},
     onSaveClick: () -> Unit = {},
     onHomeClick: () -> Unit = {},
@@ -132,7 +138,6 @@ fun AddExpenseScreen(
                     .statusBarsPadding()
                     .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
-                // Rounded Top Bar with all 4 curved edges
                 Surface(
                     shape = RoundedCornerShape(20.dp),
                     color = Color.Transparent,
@@ -144,7 +149,7 @@ fun AddExpenseScreen(
                             .fillMaxWidth()
                             .background(
                                 brush = Brush.horizontalGradient(
-                                    colors = listOf(IndigoGradientStart, IndigoGradientEnd)
+                                    colors = listOf(GradientStart, GradientEnd)
                                 ),
                                 shape = RoundedCornerShape(20.dp)
                             )
@@ -155,7 +160,6 @@ fun AddExpenseScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Title
                             Text(
                                 text = "New Expense",
                                 color = Color.White,
@@ -164,7 +168,6 @@ fun AddExpenseScreen(
                                 letterSpacing = 0.3.sp
                             )
 
-                            // Wallet icon action
                             IconButton(
                                 onClick = { },
                                 modifier = Modifier.size(36.dp)
@@ -191,7 +194,6 @@ fun AddExpenseScreen(
                 .navigationBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // --- Animated Amount Display ---
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -208,7 +210,7 @@ fun AddExpenseScreen(
                 ) { targetAmount ->
                     Text(
                         text = if (targetAmount.isEmpty()) "₹ 0.00" else "₹ $targetAmount",
-                        color = IndigoGradientEnd,
+                        color = GradientEnd,
                         fontSize = 30.sp,
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = (-0.5).sp
@@ -216,7 +218,6 @@ fun AddExpenseScreen(
                 }
             }
 
-            // --- Main Form Card ---
             Surface(
                 shape = RoundedCornerShape(20.dp),
                 color = Color.White,
@@ -229,18 +230,17 @@ fun AddExpenseScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 14.dp)
                 ) {
-                    // Amount Field
                     OutlinedTextField(
                         value = amount,
                         onValueChange = { amount = it },
                         label = { Text("Amount", fontSize = 12.sp) },
-                        placeholder = { Text("0.00", color = Color(0xFFCBD5E1), fontSize = 14.sp) },
+                        placeholder = { Text("0.00", color = TextTertiary, fontSize = 14.sp) },
                         leadingIcon = {
                             Text(
                                 text = "₹",
                                 fontSize = 18.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = IndigoGradientEnd,
+                                color = GradientEnd,
                                 modifier = Modifier.padding(start = 12.dp)
                             )
                         },
@@ -251,27 +251,26 @@ fun AddExpenseScreen(
                         singleLine = true,
                         shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = IndigoGradientEnd,
-                            unfocusedBorderColor = Color(0xFFE2E8F0),
+                            focusedBorderColor = GradientEnd,
+                            unfocusedBorderColor = DividerColor,
                             focusedContainerColor = Color(0xFFF8FAFF),
                             unfocusedContainerColor = Color(0xFFF8FAFC)
                         ),
                         textStyle = TextStyle(
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF1E293B)
+                            color = TextPrimary
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Category Selector
                     Text(
                         text = "Category",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF64748B),
+                        color = TextSecondary,
                         modifier = Modifier.padding(start = 4.dp, bottom = 6.dp)
                     )
 
@@ -287,7 +286,7 @@ fun AddExpenseScreen(
                                 label = "cat_bg"
                             )
                             val borderColor by animateColorAsState(
-                                targetValue = if (isSelected) category.color else Color(0xFFE2E8F0),
+                                targetValue = if (isSelected) category.color else DividerColor,
                                 animationSpec = tween(250),
                                 label = "cat_border"
                             )
@@ -308,7 +307,7 @@ fun AddExpenseScreen(
                                 Icon(
                                     imageVector = category.icon,
                                     contentDescription = category.name,
-                                    tint = if (isSelected) category.color else Color(0xFF94A3B8),
+                                    tint = if (isSelected) category.color else TextTertiary,
                                     modifier = Modifier.size(20.dp)
                                 )
                                 Spacer(modifier = Modifier.height(2.dp))
@@ -316,7 +315,7 @@ fun AddExpenseScreen(
                                     text = category.name,
                                     fontSize = 10.sp,
                                     fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-                                    color = if (isSelected) Color(0xFF1E293B) else Color(0xFF64748B)
+                                    color = if (isSelected) TextPrimary else TextSecondary
                                 )
                             }
                         }
@@ -324,12 +323,11 @@ fun AddExpenseScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Date Picker
                     Text(
                         text = "Date",
                         fontSize = 12.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF64748B),
+                        color = TextSecondary,
                         modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
                     )
 
@@ -338,7 +336,7 @@ fun AddExpenseScreen(
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(14.dp))
                             .background(Color(0xFFF8FAFC))
-                            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(14.dp))
+                            .border(1.dp, DividerColor, RoundedCornerShape(14.dp))
                             .clickable { showDatePicker = true }
                             .padding(horizontal = 14.dp, vertical = 12.dp)
                     ) {
@@ -354,21 +352,21 @@ fun AddExpenseScreen(
                                 Icon(
                                     imageVector = Icons.Default.DateRange,
                                     contentDescription = null,
-                                    tint = IndigoGradientEnd,
+                                    tint = GradientEnd,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Text(
                                     text = dateFormatter.format(Date(selectedDate)),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF1E293B)
+                                    color = TextPrimary
                                 )
                             }
                             Text(
                                 text = "Change",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.SemiBold,
-                                color = IndigoGradientEnd
+                                color = GradientEnd
                             )
                         }
                     }
@@ -384,12 +382,12 @@ fun AddExpenseScreen(
                                         showDatePicker = false
                                     }
                                 ) {
-                                    Text("OK", color = IndigoGradientEnd, fontWeight = FontWeight.Bold)
+                                    Text("OK", color = GradientEnd, fontWeight = FontWeight.Bold)
                                 }
                             },
                             dismissButton = {
                                 TextButton(onClick = { showDatePicker = false }) {
-                                    Text("Cancel", color = Color(0xFF64748B))
+                                    Text("Cancel", color = TextSecondary)
                                 }
                             }
                         ) {
@@ -399,18 +397,17 @@ fun AddExpenseScreen(
 
                     Spacer(modifier = Modifier.height(10.dp))
 
-                    // Description
                     OutlinedTextField(
                         value = description,
                         onValueChange = { if (it.length <= 100) description = it },
                         label = { Text("Description", fontSize = 12.sp) },
-                        placeholder = { Text("What's this for?", color = Color(0xFFCBD5E1), fontSize = 14.sp) },
+                        placeholder = { Text("What's this for?", color = TextTertiary, fontSize = 14.sp) },
                         supportingText = {
                             Text(
                                 text = "${description.length}/100",
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.End,
-                                color = if (description.length >= 100) Color(0xFFEF4444) else Color(0xFF94A3B8),
+                                color = if (description.length >= 100) DangerRed else TextTertiary,
                                 fontSize = 10.sp
                             )
                         },
@@ -418,14 +415,14 @@ fun AddExpenseScreen(
                         maxLines = 2,
                         shape = RoundedCornerShape(14.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = IndigoGradientEnd,
-                            unfocusedBorderColor = Color(0xFFE2E8F0),
+                            focusedBorderColor = GradientEnd,
+                            unfocusedBorderColor = DividerColor,
                             focusedContainerColor = Color(0xFFF8FAFF),
                             unfocusedContainerColor = Color(0xFFF8FAFC)
                         ),
                         textStyle = TextStyle(
                             fontSize = 14.sp,
-                            color = Color(0xFF1E293B)
+                            color = TextPrimary
                         ),
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -434,7 +431,6 @@ fun AddExpenseScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // --- Save Button ---
             CompactSaveButton(
                 text = "Save Expense",
                 onClick = {
@@ -444,7 +440,7 @@ fun AddExpenseScreen(
                         date = selectedDate,
                         description = description
                     )
-                    onSaveClick()   // navigate back / show toast
+                    onSaveClick()
                 },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -489,14 +485,14 @@ fun CompactSaveButton(
                 .fillMaxSize()
                 .background(
                     brush = Brush.horizontalGradient(
-                        colors = listOf(IndigoGradientStart, IndigoGradientEnd)
+                        colors = listOf(GradientStart, GradientEnd)
                     ),
                     shape = RoundedCornerShape(16.dp)
                 )
                 .shadow(
                     elevation = 6.dp,
                     shape = RoundedCornerShape(16.dp),
-                    spotColor = IndigoGradientEnd.copy(alpha = 0.3f)
+                    spotColor = GradientEnd.copy(alpha = 0.3f)
                 ),
             contentAlignment = Alignment.Center
         ) {
