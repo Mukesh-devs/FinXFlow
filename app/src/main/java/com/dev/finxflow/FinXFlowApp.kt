@@ -1,19 +1,24 @@
 package com.dev.finxflow
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,6 +43,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
@@ -63,8 +69,13 @@ import androidx.navigation.compose.rememberNavController
 import com.dev.finxflow.ui.add.AddExpenseScreen
 import com.dev.finxflow.ui.expenses.ExpensesScreen
 import com.dev.finxflow.ui.home.HomeScreen
-import com.dev.finxflow.ui.theme.IndigoGradientEnd
-import com.dev.finxflow.ui.theme.IndigoGradientStart
+import com.dev.finxflow.ui.theme.NavBarBackground
+import com.dev.finxflow.ui.theme.NavBarHighlight
+import com.dev.finxflow.ui.theme.NavIndicatorEnd
+import com.dev.finxflow.ui.theme.NavIndicatorStart
+import com.dev.finxflow.ui.theme.NavSelectedIcon
+import com.dev.finxflow.ui.theme.NavSelectedLabel
+import com.dev.finxflow.ui.theme.NavUnselectedContent
 import kotlinx.serialization.Serializable
 
 // ==========================================
@@ -89,7 +100,9 @@ data class BottomNavItem(
 )
 
 // ==========================================
-// COMPACT TOP-NOTCHED BOTTOM BAR SHAPE
+// CONVEX TOP-NOTCHED BOTTOM BAR SHAPE
+// (unchanged geometry — this was already correct,
+// it just needed a non-zero notchDepth to be visible)
 // ==========================================
 class TopNotchedBottomBarShape(
     private val notchPosition: Float,
@@ -152,7 +165,7 @@ class TopNotchedBottomBarShape(
 }
 
 // ==========================================
-// ROOT APP — COMPACT VERSION
+// ROOT APP — PREMIUM BLACK & WHITE VERSION
 // ==========================================
 @Composable
 fun FinXFlowApp(
@@ -177,14 +190,18 @@ fun FinXFlowApp(
         if (currentRouteIndex >= 0) selectedItem = currentRouteIndex
     }
 
-    // Notch position: 1/6, 3/6, 5/6 for SpaceAround
+    // Notch position: 1/6, 3/6, 5/6 — center of each equal-width slot
     val notchPosition = remember(bottomNavItems.size, selectedItem) {
         (2 * selectedItem + 1) / (2 * bottomNavItems.size).toFloat()
     }
 
+    // Spring instead of tween — gives the indicator a soft, premium "settle" bounce
     val animatedNotchPosition by animateFloatAsState(
         targetValue = notchPosition,
-        animationSpec = tween(500, easing = FastOutSlowInEasing),
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
         label = "notch_position"
     )
 
@@ -198,14 +215,16 @@ fun FinXFlowApp(
     }
 
     // ==========================================
-    // COMPACT DIMENSIONS
+    // DIMENSIONS — tuned so the notch actually
+    // nests the indicator instead of being flat (0.dp)
     // ==========================================
-    val barHeight = 70.dp          // Was 80.dp
-    val notchDepth = 0.dp         // Was 28.dp
-    val notchWidthRadius = 56.dp   // Was 36.dp
-    val indicatorSize = 56.dp      // Was 56.dp
+    val barHeight = 70.dp
+    val notchDepth = 30.dp          // was 0.dp — this is what made the bar look flat
+    val notchWidthRadius = 38.dp    // sized to hug the 56.dp indicator, not dwarf it
+    val indicatorSize = 56.dp
+    val cornerRadius = 26.dp        // rounder, pill-like bar = more premium feel
     val shapeHeight = barHeight + notchDepth
-    val containerHeight = barHeight + notchDepth + indicatorSize / 2
+    val containerHeight = 90.dp //barHeight + notchDepth + indicatorSize / 2
 
     Scaffold(
         bottomBar = {
@@ -217,12 +236,20 @@ fun FinXFlowApp(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(containerHeight)
-                        .padding(horizontal = 12.dp)
+//                        .padding(horizontal = 12.dp)
                         .onSizeChanged { containerWidth = it.width },
                     contentAlignment = Alignment.BottomCenter
                 ) {
+                    val barShape = TopNotchedBottomBarShape(
+                        notchPosition = animatedNotchPosition,
+                        notchWidthRadius = notchWidthRadius,
+                        notchDepth = notchDepth,
+                        barHeight = barHeight,
+                        cornerRadius = cornerRadius
+                    )
+
                     // ==========================================
-                    // 1. BOTTOM BAR (drawn first)
+                    // 1. BOTTOM BAR (drawn first) — black, convex
                     // ==========================================
                     Box(
                         modifier = Modifier
@@ -230,83 +257,93 @@ fun FinXFlowApp(
                             .height(shapeHeight)
                             .align(Alignment.BottomCenter)
                             .shadow(
-                                elevation = 10.dp,
-                                shape = TopNotchedBottomBarShape(
-                                    notchPosition = animatedNotchPosition,
-                                    notchWidthRadius = notchWidthRadius,
-                                    notchDepth = notchDepth,
-                                    barHeight = barHeight,
-                                    cornerRadius = 12.dp
-                                ),
+                                elevation = 14.dp,
+                                shape = barShape,
                                 clip = true,
-                                spotColor = Color.Black.copy(alpha = 0.06f)
+                                spotColor = Color.Black.copy(alpha = 0.18f)
                             )
-                            .background(
-                                color = Color(0xFFF8FAFC),
-                                shape = TopNotchedBottomBarShape(
-                                    notchPosition = animatedNotchPosition,
-                                    notchWidthRadius = notchWidthRadius,
-                                    notchDepth = notchDepth,
-                                    barHeight = barHeight,
-                                    cornerRadius = 12.dp
-                                )
-                            )
+                            .background(color = NavBarBackground, shape = barShape)
                     ) {
+                        // Subtle top sheen — fakes a convex, light-catching surface
+                        // instead of a flat black slab.
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(shapeHeight)
+                                .clip(barShape)
+                                .background(
+                                    Brush.verticalGradient(
+                                        colors = listOf(NavBarHighlight, Color.Transparent)
+                                    )
+                                )
+                        )
+
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(barHeight)
                                 .align(Alignment.BottomCenter)
-                                .padding(horizontal = 8.dp)
-                                .padding(bottom = 6.dp),
-                            horizontalArrangement = Arrangement.SpaceAround,
+                                .padding(bottom = 10.dp),
                             verticalAlignment = Alignment.Bottom
                         ) {
                             bottomNavItems.forEachIndexed { index, item ->
                                 val isSelected = selectedItem == index
 
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                // Each slot gets an EQUAL 1/3 share of the bar width,
+                                // matching exactly how notchPosition is calculated above.
+                                // (Previously an extra 8.dp Row padding made the tabs sit
+                                // narrower than the width used for the notch math — that
+                                // mismatch was the misalignment.)
+                                Box(
                                     modifier = Modifier
-                                        .clickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = null,
-                                            onClick = {
-                                                if (selectedItem != index) {
-                                                    selectedItem = index
-                                                    navController.navigate(item.route) {
-                                                        popUpTo(HomeRoute) { inclusive = false }
-                                                        launchSingleTop = true
-                                                        restoreState = true
+                                        .weight(1f)
+                                        .fillMaxHeight(),
+                                    contentAlignment = Alignment.BottomCenter
+                                ) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null,
+                                                onClick = {
+                                                    if (selectedItem != index) {
+                                                        selectedItem = index
+                                                        navController.navigate(item.route) {
+                                                            popUpTo(HomeRoute) { inclusive = false }
+                                                            launchSingleTop = true
+                                                            restoreState = true
+                                                        }
                                                     }
                                                 }
-                                            }
-                                        )
-                                        .padding(horizontal = 8.dp, vertical = 2.dp)
-                                ) {
-                                    if (isSelected) {
-                                        Box(modifier = Modifier.size(20.dp))
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = item.label,
-                                            fontSize = 10.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = IndigoGradientEnd
-                                        )
-                                    } else {
-                                        Icon(
-                                            imageVector = item.icon,
-                                            contentDescription = item.label,
-                                            tint = Color(0xFF94A3B8),
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = item.label,
-                                            fontSize = 10.sp,
-                                            fontWeight = FontWeight.Medium,
-                                            color = Color(0xFF94A3B8)
-                                        )
+                                            )
+                                            .padding(vertical = 2.dp)
+                                    ) {
+                                        if (isSelected) {
+                                            // Icon lives in the floating indicator instead
+                                            Box(modifier = Modifier.size(20.dp))
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = item.label,
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = NavSelectedLabel
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = item.icon,
+                                                contentDescription = item.label,
+                                                tint = NavUnselectedContent,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = item.label,
+                                                fontSize = 10.sp,
+                                                fontWeight = FontWeight.Medium,
+                                                color = NavUnselectedContent
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -314,33 +351,43 @@ fun FinXFlowApp(
                     }
 
                     // ==========================================
-                    // 2. FLOATING INDICATOR (drawn on top)
+                    // 2. FLOATING INDICATOR (drawn on top) — white, nested in the notch
                     // ==========================================
                     Box(
                         modifier = Modifier
                             .align(Alignment.TopCenter)
                             .offset(x = indicatorXOffset, y = 0.dp)
                             .size(indicatorSize)
+                            .shadow(
+                                elevation = 10.dp,
+                                shape = CircleShape,
+                                spotColor = Color.Black.copy(alpha = 0.25f)
+                            )
                             .background(
                                 brush = Brush.linearGradient(
-                                    colors = listOf(IndigoGradientStart, IndigoGradientEnd)
+                                    colors = listOf(NavIndicatorStart, NavIndicatorEnd)
                                 ),
                                 shape = CircleShape
-                            )
-                            .shadow(
-                                elevation = 8.dp,
-                                shape = CircleShape,
-                                spotColor = IndigoGradientEnd.copy(alpha = 0.35f)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        val selectedIcon = bottomNavItems[selectedItem].icon
-                        Icon(
-                            imageVector = selectedIcon,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
+                        AnimatedContent(
+                            targetState = bottomNavItems[selectedItem].icon,
+                            transitionSpec = {
+                                (scaleIn(initialScale = 0.6f, animationSpec = tween(220)) +
+                                        fadeIn(animationSpec = tween(220))) togetherWith
+                                        (scaleOut(targetScale = 0.6f, animationSpec = tween(150)) +
+                                                fadeOut(animationSpec = tween(150)))
+                            },
+                            label = "nav_icon_swap"
+                        ) { icon ->
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = null,
+                                tint = NavSelectedIcon,
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
                     }
                 }
             }

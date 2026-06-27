@@ -121,7 +121,7 @@ fun HomeScreen(
             item {
                 TotalExpenseCard(
                     amount = uiState.totalExpense,
-                    subtitle = "This Month"
+                    subtitle = ""
                 )
             }
 
@@ -411,13 +411,13 @@ fun RecentExpensesSection(
                     fontWeight = FontWeight.Bold
                 )
 
-                Text(
-                    text = "View All →",
-                    color = IndigoBlue,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.clickable { onViewAllClick() }
-                )
+//                Text(
+//                    text = "View All →",
+//                    color = IndigoBlue,
+//                    fontSize = 14.sp,
+//                    fontWeight = FontWeight.Medium,
+//                    modifier = Modifier.clickable { onViewAllClick() }
+//                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
