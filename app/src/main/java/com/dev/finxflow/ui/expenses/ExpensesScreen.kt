@@ -110,7 +110,7 @@ fun ExpensesScreen(
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
-            // Modern curved header
+            // Compact curved header
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -118,7 +118,7 @@ fun ExpensesScreen(
                         brush = Brush.linearGradient(
                             colors = listOf(IndigoGradientStart, IndigoGradientEnd)
                         ),
-                        shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
+                        shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp, topStart = 32.dp, topEnd = 32.dp)
                     )
                     .clip(RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp))
                     .statusBarsPadding()
@@ -126,7 +126,7 @@ fun ExpensesScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 16.dp)
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -144,7 +144,7 @@ fun ExpensesScreen(
                         Text(
                             text = "Expenses",
                             color = Color.White,
-                            fontSize = 22.sp,
+                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.weight(1f)
@@ -159,13 +159,12 @@ fun ExpensesScreen(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                    // Total amount display
                     Text(
                         text = "₹${String.format("%,.2f", uiState.filteredExpenses.sumOf { it.amount })}",
                         color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 32.sp,
+                        fontSize = 28.sp,
                         fontWeight = FontWeight.ExtraBold,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -174,12 +173,12 @@ fun ExpensesScreen(
                     Text(
                         text = "Total Spent",
                         color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 14.sp,
+                        fontSize = 13.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
             }
         }
@@ -295,18 +294,6 @@ fun ExpensesScreen(
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1E293B)
                 )
-                Surface(
-                    shape = RoundedCornerShape(12.dp),
-                    color = IndigoBlue.copy(alpha = 0.1f)
-                ) {
-                    Text(
-                        text = "${uiState.filteredExpenses.size} found",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = IndigoBlue,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                    )
-                }
             }
 
             // Expenses List

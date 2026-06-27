@@ -1,94 +1,97 @@
 package com.dev.finxflow.ui.add
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material.icons.outlined.LocalGroceryStore
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.dev.finxflow.ui.theme.IndigoBlue
 import com.dev.finxflow.ui.theme.IndigoGradientEnd
 import com.dev.finxflow.ui.theme.IndigoGradientStart
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
+// ==========================================
+// DATA MODELS
+// ==========================================
 data class CategoryOption(
     val name: String,
     val icon: ImageVector,
-    val color: Color
+    val color: Color,
+    val lightColor: Color
 )
 
+// ==========================================
+// SCREEN
+// ==========================================
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddExpenseScreen(
@@ -99,20 +102,18 @@ fun AddExpenseScreen(
 ) {
     var amount by rememberSaveable { mutableStateOf("") }
     var description by rememberSaveable { mutableStateOf("") }
-    var selectedCategory by rememberSaveable { mutableStateOf("Food & Dining") }
-    var categoryExpanded by remember { mutableStateOf(false) }
+    var selectedCategory by rememberSaveable { mutableStateOf("Food") }
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedDate by rememberSaveable { mutableStateOf(System.currentTimeMillis()) }
-    var selectedTab by rememberSaveable { mutableIntStateOf(1) }
 
     val dateFormatter = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
 
     val categories = remember {
         listOf(
-            CategoryOption("Food & Dining", Icons.Outlined.Restaurant, Color(0xFFFF8A65)),
-            CategoryOption("Transport", Icons.Outlined.DirectionsCar, Color(0xFF4DB6AC)),
-            CategoryOption("Shopping", Icons.Outlined.ShoppingBag, Color(0xFF7986CB)),
-            CategoryOption("Groceries", Icons.Outlined.LocalGroceryStore, Color(0xFF8D6E63))
+            CategoryOption("Food", Icons.Outlined.Restaurant, Color(0xFFFF8A65), Color(0xFFFFF3E0)),
+            CategoryOption("Transport", Icons.Outlined.DirectionsCar, Color(0xFF4DB6AC), Color(0xFFE0F2F1)),
+            CategoryOption("Shopping", Icons.Outlined.ShoppingBag, Color(0xFF7986CB), Color(0xFFE8EAF6)),
+            CategoryOption("Grocery", Icons.Outlined.LocalGroceryStore, Color(0xFF8D6E63), Color(0xFFF5F5F5))
         )
     }
 
@@ -120,97 +121,60 @@ fun AddExpenseScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Add Expense",
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                ),
-                modifier = Modifier.background(
-                    brush = Brush.horizontalGradient(
-                        colors = listOf(IndigoGradientStart, IndigoGradientEnd)
-                    )
-                )
-            )
-        },
-        bottomBar = {
-            Column {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
-                    contentAlignment = Alignment.BottomCenter
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.background)
+                    .statusBarsPadding()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            ) {
+                // Rounded Top Bar with all 4 curved edges
+                Surface(
+                    shape = RoundedCornerShape(20.dp),
+                    color = Color.Transparent,
+                    shadowElevation = 6.dp,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    GradientFab(onClick = { /* Already on Add */ })
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(IndigoGradientStart, IndigoGradientEnd)
+                                ),
+                                shape = RoundedCornerShape(20.dp)
+                            )
+                            .padding(horizontal = 20.dp, vertical = 14.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Title
+                            Text(
+                                text = "New Expense",
+                                color = Color.White,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.3.sp
+                            )
+
+                            // Wallet icon action
+                            IconButton(
+                                onClick = { },
+                                modifier = Modifier.size(36.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.AccountBalanceWallet,
+                                    contentDescription = null,
+                                    tint = Color.White,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+                        }
+                    }
                 }
-//                NavigationBar(
-//                    containerColor = Color.White,
-//                    tonalElevation = 0.dp,
-//                    modifier = Modifier.navigationBarsPadding()
-//                ) {
-//                    NavigationBarItem(
-//                        icon = { Icon(Icons.Default.Home, contentDescription = "Home", modifier = Modifier.size(24.dp)) },
-//                        label = { Text("Home", fontSize = 12.sp) },
-//                        selected = selectedTab == 0,
-//                        onClick = {
-//                            selectedTab = 0
-//                            onHomeClick()
-//                        },
-//                        colors = NavigationBarItemDefaults.colors(
-//                            selectedIconColor = IndigoGradientEnd,
-//                            selectedTextColor = IndigoGradientEnd,
-//                            unselectedIconColor = Color(0xFF64748B),
-//                            unselectedTextColor = Color(0xFF64748B),
-//                            indicatorColor = Color(0xFFEEF2FF)
-//                        )
-//                    )
-//                    NavigationBarItem(
-//                        icon = { Icon(Icons.Default.Add, contentDescription = "Add", modifier = Modifier.size(24.dp)) },
-//                        label = { Text("Add", fontSize = 12.sp) },
-//                        selected = selectedTab == 1,
-//                        onClick = { selectedTab = 1 },
-//                        colors = NavigationBarItemDefaults.colors(
-//                            selectedIconColor = IndigoGradientEnd,
-//                            selectedTextColor = IndigoGradientEnd,
-//                            unselectedIconColor = Color(0xFF64748B),
-//                            unselectedTextColor = Color(0xFF64748B),
-//                            indicatorColor = Color(0xFFEEF2FF)
-//                        )
-//                    )
-//                    NavigationBarItem(
-//                        icon = { Icon(Icons.Default.List, contentDescription = "Expenses", modifier = Modifier.size(24.dp)) },
-//                        label = { Text("Expenses", fontSize = 12.sp) },
-//                        selected = selectedTab == 2,
-//                        onClick = {
-//                            selectedTab = 2
-//                            onExpensesClick()
-//                        },
-//                        colors = NavigationBarItemDefaults.colors(
-//                            selectedIconColor = IndigoGradientEnd,
-//                            selectedTextColor = IndigoGradientEnd,
-//                            unselectedIconColor = Color(0xFF64748B),
-//                            unselectedTextColor = Color(0xFF64748B),
-//                            indicatorColor = Color(0xFFEEF2FF)
-//                        )
-//                    )
-//                }
             }
         }
     ) { innerPadding ->
@@ -218,237 +182,271 @@ fun AddExpenseScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .imePadding()
-                .verticalScroll(rememberScrollState())
                 .background(MaterialTheme.colorScheme.background)
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 16.dp)
+                .navigationBarsPadding(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Centered Wallet Icon
-            Surface(
-                shape = CircleShape,
-                color = IndigoBlue.copy(alpha = 0.1f),
-                modifier = Modifier.size(80.dp)
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.AccountBalanceWallet,
-                        contentDescription = "Wallet",
-                        tint = IndigoBlue,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Amount
-            OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it },
-                label = { Text("Amount", fontWeight = FontWeight.Medium) },
-                placeholder = { Text("850.00") },
-                leadingIcon = {
-                    Text(
-                        text = "₹",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = IndigoBlue,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Decimal,
-                    imeAction = ImeAction.Next
-                ),
-                singleLine = true,
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = IndigoBlue,
-                    unfocusedBorderColor = Color(0xFFE2E8F0),
-                    focusedLabelColor = IndigoBlue
-                ),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Category Dropdown
-            ExposedDropdownMenuBox(
-                expanded = categoryExpanded,
-                onExpandedChange = { categoryExpanded = it }
-            ) {
-                OutlinedTextField(
-                    value = selectedCategory,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text("Category", fontWeight = FontWeight.Medium) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = selectedCategoryOption.icon,
-                            contentDescription = null,
-                            tint = selectedCategoryOption.color,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
-                    },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = IndigoBlue,
-                        unfocusedBorderColor = Color(0xFFE2E8F0),
-                        focusedLabelColor = IndigoBlue
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor()
-                )
-
-                ExposedDropdownMenu(
-                    expanded = categoryExpanded,
-                    onDismissRequest = { categoryExpanded = false },
-                    modifier = Modifier.background(Color.White)
-                ) {
-                    categories.forEach { category ->
-                        DropdownMenuItem(
-                            text = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = category.icon,
-                                        contentDescription = null,
-                                        tint = category.color,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Text(
-                                        text = category.name,
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                }
-                            },
-                            onClick = {
-                                selectedCategory = category.name
-                                categoryExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Date Picker
+            // --- Animated Amount Display ---
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showDatePicker = true }
+                    .padding(vertical = 10.dp),
+                contentAlignment = Alignment.Center
             ) {
-                OutlinedTextField(
-                    value = dateFormatter.format(Date(selectedDate)),
-                    onValueChange = {},
-                    enabled = false,
-                    readOnly = true,
-                    label = { Text("Date", fontWeight = FontWeight.Medium) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.DateRange,
-                            contentDescription = null,
-                            tint = IndigoBlue,
-                            modifier = Modifier.padding(start = 8.dp)
-                        )
+                AnimatedContent(
+                    targetState = amount,
+                    transitionSpec = {
+                        fadeIn() + slideInVertically { it / 2 } togetherWith
+                                fadeOut() + slideOutVertically { it / 2 }
                     },
-                    trailingIcon = {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Select date",
-                            tint = Color(0xFF64748B)
-                        )
-                    },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        disabledBorderColor = Color(0xFFE2E8F0),
-                        disabledLabelColor = IndigoBlue,
-                        disabledLeadingIconColor = IndigoBlue
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            if (showDatePicker) {
-                val datePickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDate)
-                DatePickerDialog(
-                    onDismissRequest = { showDatePicker = false },
-                    confirmButton = {
-                        TextButton(
-                            onClick = {
-                                datePickerState.selectedDateMillis?.let { selectedDate = it }
-                                showDatePicker = false
-                            }
-                        ) {
-                            Text("OK", color = IndigoBlue, fontWeight = FontWeight.Bold)
-                        }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = { showDatePicker = false }) {
-                            Text("Cancel", color = Color(0xFF64748B))
-                        }
-                    }
-                ) {
-                    DatePicker(state = datePickerState)
+                    label = "amount_anim"
+                ) { targetAmount ->
+                    Text(
+                        text = if (targetAmount.isEmpty()) "₹ 0.00" else "₹ $targetAmount",
+                        color = IndigoGradientEnd,
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = (-0.5).sp
+                    )
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Description
-            OutlinedTextField(
-                value = description,
-                onValueChange = { if (it.length <= 100) description = it },
-                label = { Text("Description", fontWeight = FontWeight.Medium) },
-                placeholder = { Text("Lunch with team") },
-                supportingText = {
-                    Text(
-                        text = "${description.length}/100",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.End,
-                        color = if (description.length >= 100) Color(0xFFEF4444) else Color(0xFF64748B),
-                        fontSize = 12.sp
-                    )
-                },
-                minLines = 3,
-                maxLines = 5,
-                shape = RoundedCornerShape(16.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = IndigoBlue,
-                    unfocusedBorderColor = Color(0xFFE2E8F0),
-                    focusedLabelColor = IndigoBlue
-                ),
+            // --- Main Form Card ---
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = Color.White,
+                tonalElevation = 1.dp,
+                shadowElevation = 2.dp,
                 modifier = Modifier.fillMaxWidth()
-            )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 14.dp)
+                ) {
+                    // Amount Field
+                    OutlinedTextField(
+                        value = amount,
+                        onValueChange = { amount = it },
+                        label = { Text("Amount", fontSize = 12.sp) },
+                        placeholder = { Text("0.00", color = Color(0xFFCBD5E1), fontSize = 14.sp) },
+                        leadingIcon = {
+                            Text(
+                                text = "₹",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = IndigoGradientEnd,
+                                modifier = Modifier.padding(start = 12.dp)
+                            )
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Decimal,
+                            imeAction = ImeAction.Next
+                        ),
+                        singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = IndigoGradientEnd,
+                            unfocusedBorderColor = Color(0xFFE2E8F0),
+                            focusedContainerColor = Color(0xFFF8FAFF),
+                            unfocusedContainerColor = Color(0xFFF8FAFC)
+                        ),
+                        textStyle = TextStyle(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF1E293B)
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
 
-            Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(10.dp))
 
-            // Save Button
-            GradientButton(
+                    // Category Selector
+                    Text(
+                        text = "Category",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF64748B),
+                        modifier = Modifier.padding(start = 4.dp, bottom = 6.dp)
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        categories.forEach { category ->
+                            val isSelected = selectedCategory == category.name
+                            val bgColor by animateColorAsState(
+                                targetValue = if (isSelected) category.lightColor else Color(0xFFF8FAFC),
+                                animationSpec = tween(250),
+                                label = "cat_bg"
+                            )
+                            val borderColor by animateColorAsState(
+                                targetValue = if (isSelected) category.color else Color(0xFFE2E8F0),
+                                animationSpec = tween(250),
+                                label = "cat_border"
+                            )
+
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(bgColor)
+                                    .border(1.5.dp, borderColor, RoundedCornerShape(12.dp))
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null
+                                    ) { selectedCategory = category.name }
+                                    .padding(vertical = 8.dp, horizontal = 2.dp)
+                            ) {
+                                Icon(
+                                    imageVector = category.icon,
+                                    contentDescription = category.name,
+                                    tint = if (isSelected) category.color else Color(0xFF94A3B8),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = category.name,
+                                    fontSize = 10.sp,
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                                    color = if (isSelected) Color(0xFF1E293B) else Color(0xFF64748B)
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Date Picker
+                    Text(
+                        text = "Date",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF64748B),
+                        modifier = Modifier.padding(start = 4.dp, bottom = 4.dp)
+                    )
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(Color(0xFFF8FAFC))
+                            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(14.dp))
+                            .clickable { showDatePicker = true }
+                            .padding(horizontal = 14.dp, vertical = 12.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DateRange,
+                                    contentDescription = null,
+                                    tint = IndigoGradientEnd,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Text(
+                                    text = dateFormatter.format(Date(selectedDate)),
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF1E293B)
+                                )
+                            }
+                            Text(
+                                text = "Change",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = IndigoGradientEnd
+                            )
+                        }
+                    }
+
+                    if (showDatePicker) {
+                        val datePickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDate)
+                        DatePickerDialog(
+                            onDismissRequest = { showDatePicker = false },
+                            confirmButton = {
+                                TextButton(
+                                    onClick = {
+                                        datePickerState.selectedDateMillis?.let { selectedDate = it }
+                                        showDatePicker = false
+                                    }
+                                ) {
+                                    Text("OK", color = IndigoGradientEnd, fontWeight = FontWeight.Bold)
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showDatePicker = false }) {
+                                    Text("Cancel", color = Color(0xFF64748B))
+                                }
+                            }
+                        ) {
+                            DatePicker(state = datePickerState)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Description
+                    OutlinedTextField(
+                        value = description,
+                        onValueChange = { if (it.length <= 100) description = it },
+                        label = { Text("Description", fontSize = 12.sp) },
+                        placeholder = { Text("What's this for?", color = Color(0xFFCBD5E1), fontSize = 14.sp) },
+                        supportingText = {
+                            Text(
+                                text = "${description.length}/100",
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.End,
+                                color = if (description.length >= 100) Color(0xFFEF4444) else Color(0xFF94A3B8),
+                                fontSize = 10.sp
+                            )
+                        },
+                        minLines = 2,
+                        maxLines = 2,
+                        shape = RoundedCornerShape(14.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = IndigoGradientEnd,
+                            unfocusedBorderColor = Color(0xFFE2E8F0),
+                            focusedContainerColor = Color(0xFFF8FAFF),
+                            unfocusedContainerColor = Color(0xFFF8FAFC)
+                        ),
+                        textStyle = TextStyle(
+                            fontSize = 14.sp,
+                            color = Color(0xFF1E293B)
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // --- Save Button ---
+            CompactSaveButton(
                 text = "Save Expense",
                 onClick = onSaveClick,
                 modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
 
+// ==========================================
+// COMPACT SAVE BUTTON
+// ==========================================
 @Composable
-fun GradientButton(
+fun CompactSaveButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -456,76 +454,56 @@ fun GradientButton(
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.97f else 1f,
+        targetValue = if (isPressed) 0.96f else 1f,
         animationSpec = tween(150),
         label = "btn_scale"
     )
 
-    Box(
+    Button(
+        onClick = onClick,
         modifier = modifier
-            .height(56.dp)
-            .scale(scale)
-            .background(
-                brush = Brush.horizontalGradient(
-                    colors = listOf(IndigoGradientStart, IndigoGradientEnd)
-                ),
-                shape = RoundedCornerShape(16.dp)
-            )
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            ),
-        contentAlignment = Alignment.Center
+            .height(48.dp)
+            .scale(scale),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Transparent,
+            contentColor = Color.White
+        ),
+        contentPadding = PaddingValues(0.dp),
+        interactionSource = interactionSource
     ) {
-        Text(
-            text = text,
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-fun GradientFab(
-    onClick: () -> Unit
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.9f else 1f,
-        animationSpec = tween(150),
-        label = "fab_scale"
-    )
-
-    Box(
-        modifier = Modifier
-            .size(64.dp)
-            .scale(scale)
-            .shadow(
-                elevation = 8.dp,
-                shape = CircleShape,
-                spotColor = IndigoGradientEnd.copy(alpha = 0.3f)
-            )
-            .background(
-                brush = Brush.linearGradient(
-                    colors = listOf(IndigoGradientStart, IndigoGradientEnd)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(IndigoGradientStart, IndigoGradientEnd)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                )
+                .shadow(
+                    elevation = 6.dp,
+                    shape = RoundedCornerShape(16.dp),
+                    spotColor = IndigoGradientEnd.copy(alpha = 0.3f)
                 ),
-                shape = CircleShape
-            )
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = onClick
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = "Add",
-            tint = Color.White,
-            modifier = Modifier.size(28.dp)
-        )
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Done,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = text,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.3.sp
+                )
+            }
+        }
     }
 }

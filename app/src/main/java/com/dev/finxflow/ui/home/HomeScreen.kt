@@ -163,9 +163,9 @@ fun HomeHeader(
                 brush = Brush.verticalGradient(
                     colors = listOf(IndigoGradientStart, IndigoGradientEnd)
                 ),
-                shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
+                shape = RoundedCornerShape(bottomStart = 52.dp, bottomEnd = 52.dp, topStart = 52.dp, topEnd = 52.dp)
             )
-            .padding(start = 24.dp, end = 24.dp, top = 48.dp, bottom = 32.dp)
+            .padding(start = 30.dp, end = 24.dp, top = 18.dp, bottom = 18.dp)
     ) {
         Column {
             Text(
