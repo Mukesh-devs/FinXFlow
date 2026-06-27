@@ -1,0 +1,571 @@
+package com.dev.finxflow.ui.home
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.outlined.Fastfood
+import androidx.compose.material.icons.outlined.LocalGroceryStore
+import androidx.compose.material.icons.outlined.LocalTaxi
+import androidx.compose.material.icons.outlined.Restaurant
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.dev.finxflow.ui.theme.DividerColor
+import com.dev.finxflow.ui.theme.GradientEnd
+import com.dev.finxflow.ui.theme.GradientStart
+import com.dev.finxflow.ui.theme.PrimaryMain
+import com.dev.finxflow.ui.theme.TextPrimary
+import com.dev.finxflow.ui.theme.TextSecondary
+import com.dev.finxflow.viewmodel.ExpenseViewModel
+import kotlinx.coroutines.delay
+
+// ==========================================
+// DATA MODELS (UI Layer)
+// ==========================================
+data class RecentExpenseUi(
+    val name: String,
+    val category: String,
+    val amount: String,
+    val icon: ImageVector,
+    val iconColor: Color
+)
+
+data class TopCategoryUi(
+    val name: String,
+    val amount: String,
+    val progress: Float,
+    val iconColor: Color
+)
+
+// ==========================================
+// HOME SCREEN
+// ==========================================
+@Composable
+fun HomeScreen(
+    viewModel: ExpenseViewModel = viewModel(),
+    onViewAllExpensesClick: () -> Unit = {}
+) {
+    val uiState by viewModel.homeUiState.collectAsStateWithLifecycle()
+    var isVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        delay(100)
+        isVisible = true
+    }
+
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = fadeIn(animationSpec = tween(600)) +
+                slideInVertically(
+                    initialOffsetY = { it / 4 },
+                    animationSpec = tween(700, easing = FastOutSlowInEasing)
+                )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(bottom = 32.dp)
+        ) {
+            HomeHeader()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TotalExpenseCard(
+                amount = uiState.totalExpense,
+                subtitle = ""
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            StatisticsSection(
+                monthlyAmount = uiState.monthlyExpense,
+                monthlyPeriod = uiState.currentMonth,
+                dailyAmount = uiState.dailyExpense,
+                dailyPeriod = "Today"
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            CategoryExpensesSection(
+                foodAmount = uiState.foodExpense,
+                transportAmount = uiState.transportExpense,
+                shoppingAmount = uiState.shoppingExpense,
+                otherAmount = uiState.otherExpense
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+// ==========================================
+// HEADER (No notification icon)
+// ==========================================
+@Composable
+fun HomeHeader() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
+            .statusBarsPadding()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = Color.Transparent,
+            shadowElevation = 6.dp,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        brush = Brush.horizontalGradient(
+                            colors = listOf(GradientStart, GradientEnd)
+                        ),
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "FinXFlow",
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp
+                )
+            }
+        }
+    }
+}
+
+// ==========================================
+// TOTAL EXPENSE CARD
+// ==========================================
+@Composable
+fun TotalExpenseCard(
+    amount: String,
+    subtitle: String
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .shadow(
+                elevation = 8.dp,
+                shape = RoundedCornerShape(24.dp),
+                spotColor = PrimaryMain.copy(alpha = 0.1f)
+            ),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "Total Expense",
+                    color = TextSecondary,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = amount,
+                    color = TextPrimary,
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = subtitle,
+                    color = TextSecondary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal
+                )
+            }
+
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = PrimaryMain.copy(alpha = 0.1f),
+                modifier = Modifier.size(56.dp)
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.AccountBalanceWallet,
+                        contentDescription = "Wallet",
+                        tint = PrimaryMain,
+                        modifier = Modifier.size(28.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ==========================================
+// STATISTICS SECTION
+// ==========================================
+@Composable
+fun StatisticsSection(
+    monthlyAmount: String,
+    monthlyPeriod: String,
+    dailyAmount: String,
+    dailyPeriod: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        StatCard(
+            modifier = Modifier.weight(1f),
+            title = "Monthly Expense",
+            amount = monthlyAmount,
+            subtitle = monthlyPeriod,
+            icon = Icons.Outlined.CalendarMonth,
+            iconBackground = Color(0xFFEEF2FF)
+        )
+
+        StatCard(
+            modifier = Modifier.weight(1f),
+            title = "Daily Expense",
+            amount = dailyAmount,
+            subtitle = dailyPeriod,
+            icon = Icons.Default.TrendingUp,
+            iconBackground = Color(0xFFF0FDF4)
+        )
+    }
+}
+
+@Composable
+fun CategoryExpensesSection(
+    foodAmount: String,
+    transportAmount: String,
+    shoppingAmount: String,
+    otherAmount: String
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            StatCard(
+                modifier = Modifier.weight(1f),
+                title = "Food Expense",
+                amount = foodAmount,
+                subtitle = "This Month",
+                icon = Icons.Outlined.Fastfood,
+                iconBackground = Color(0xFFFFF7ED)
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                title = "Transport",
+                amount = transportAmount,
+                subtitle = "This Month",
+                icon = Icons.Outlined.LocalTaxi,
+                iconBackground = Color(0xFFECFDF5)
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            StatCard(
+                modifier = Modifier.weight(1f),
+                title = "Shopping",
+                amount = shoppingAmount,
+                subtitle = "This Month",
+                icon = Icons.Outlined.LocalGroceryStore,
+                iconBackground = Color(0xFFFEF3C7)
+            )
+            StatCard(
+                modifier = Modifier.weight(1f),
+                title = "Other",
+                amount = otherAmount,
+                subtitle = "This Month",
+                icon = Icons.Outlined.AccountBalanceWallet,
+                iconBackground = Color(0xFFF3F4F6)
+            )
+        }
+    }
+}
+
+@Composable
+fun StatCard(
+    modifier: Modifier = Modifier,
+    title: String,
+    amount: String,
+    subtitle: String,
+    icon: ImageVector,
+    iconBackground: Color
+) {
+    Card(
+        modifier = modifier
+            .shadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(20.dp),
+                spotColor = Color.Black.copy(alpha = 0.05f)
+            ),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = title,
+                    color = TextSecondary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Medium
+                )
+
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = iconBackground,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = PrimaryMain,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = amount,
+                color = TextPrimary,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = subtitle,
+                color = TextSecondary,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Normal
+            )
+        }
+    }
+}
+
+// ==========================================
+// RECENT EXPENSES
+// ==========================================
+@Composable
+fun RecentExpensesSection(
+    expenses: List<RecentExpenseUi>,
+    onViewAllClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp)
+            .shadow(
+                elevation = 6.dp,
+                shape = RoundedCornerShape(24.dp),
+                spotColor = Color.Black.copy(alpha = 0.05f)
+            ),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Recent Expenses",
+                    color = TextPrimary,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            expenses.forEachIndexed { index, expense ->
+                ExpenseListItem(expense = expense)
+                if (index < expenses.size - 1) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(DividerColor)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpenseListItem(expense: RecentExpenseUi) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.98f else 1f,
+        animationSpec = tween(150),
+        label = "scale"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = { }
+            )
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = expense.iconColor.copy(alpha = 0.15f),
+            modifier = Modifier.size(48.dp)
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = expense.icon,
+                    contentDescription = expense.category,
+                    tint = expense.iconColor,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            val displayName = expense.name.take(15) + if (expense.name.length > 20) "…" else ""
+
+            Text(
+                text = displayName,
+                color = TextPrimary,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = expense.category,
+                color = TextSecondary,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Normal
+            )
+        }
+
+        Text(
+            text = expense.amount,
+            color = TextPrimary,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+// ==========================================
+// PREVIEW
+// ==========================================
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun HomeScreenPreview() {
+    com.dev.finxflow.ui.theme.FinXFlowTheme {
+        HomeScreen(
+            viewModel = viewModel(),
+            onViewAllExpensesClick = {}
+        )
+    }
+}
