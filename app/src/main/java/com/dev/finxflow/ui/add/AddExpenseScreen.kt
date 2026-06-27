@@ -35,6 +35,7 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.DirectionsCar
 import androidx.compose.material.icons.outlined.LocalGroceryStore
+import androidx.compose.material.icons.outlined.OtherHouses
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.ShoppingBag
 import androidx.compose.material3.Button
@@ -115,8 +116,8 @@ fun AddExpenseScreen(
         listOf(
             CategoryOption("Food", Icons.Outlined.Restaurant, Color(0xFFFF8A65), Color(0xFFFFF3E0)),
             CategoryOption("Transport", Icons.Outlined.DirectionsCar, Color(0xFF4DB6AC), Color(0xFFE0F2F1)),
-            CategoryOption("Shopping", Icons.Outlined.ShoppingBag, Color(0xFF7986CB), Color(0xFFE8EAF6)),
-            CategoryOption("Grocery", Icons.Outlined.LocalGroceryStore, Color(0xFF8D6E63), Color(0xFFF5F5F5))
+            CategoryOption("Shopping", Icons.Outlined.LocalGroceryStore, Color(0xFF7986CB), Color(0xFFE8EAF6)),
+            CategoryOption("Other", Icons.Outlined.OtherHouses, Color(0xFF8D6E63), Color(0xFFF5F5F5))
         )
     }
 
