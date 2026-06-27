@@ -483,8 +483,10 @@ fun ExpenseListItem(expense: RecentExpenseUi) {
         Column(
             modifier = Modifier.weight(1f)
         ) {
+            val displayName = expense.name.take(15) + if (expense.name.length > 20) "…" else ""
+
             Text(
-                text = expense.name,
+                text = displayName,
                 color = Color(0xFF1E293B),
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold

@@ -2,6 +2,7 @@ package com.dev.finxflow.ui.expenses
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures   // NEW
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.outlined.LocalGroceryStore
 import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material3.AlertDialog   // NEW
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
@@ -59,6 +61,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput   // NEW
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -100,6 +103,10 @@ fun ExpensesScreen(
     var showFromDatePicker by remember { mutableStateOf(false) }
     var showToDatePicker by remember { mutableStateOf(false) }
 
+    // ── NEW: Delete dialog state ──
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var expenseToDelete by remember { mutableStateOf<Expense?>(null) }
+
     LaunchedEffect(uiState.exportMessage) {
         uiState.exportMessage?.let { message ->
             scope.launch { snackbarHostState.showSnackbar(message) }
@@ -139,17 +146,17 @@ fun ExpensesScreen(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            IconButton(
-                                onClick = onBackClick,
-                                modifier = Modifier.size(32.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = "Back",
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
+//                            IconButton(
+//                                onClick = onBackClick,
+                                Box(modifier = Modifier.size(32.dp))
+//                            ) {
+//                                Icon(
+//                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                                    contentDescription = "Back",
+//                                    tint = Color.White,
+//                                    modifier = Modifier.size(20.dp)
+//                                )
+//                            }
 
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally
@@ -285,7 +292,7 @@ fun ExpensesScreen(
                 }
             }
 
-            // List Header
+            // List Header ── MODIFIED: added hint subtitle
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -293,12 +300,23 @@ fun ExpensesScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Transactions",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1E293B)
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Transactions",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1E293B)
+                    )
+                    Text(
+                        text = "Double click to delete",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Normal,
+                        color = Color(0xFF94A3B8)
+                    )
+                }
             }
 
             // Expenses List
@@ -311,12 +329,67 @@ fun ExpensesScreen(
                     items = uiState.filteredExpenses,
                     key = { it.id }
                 ) { expense ->
-                    ExpenseItemCard(expense = expense, dateFormatter = dateFormatter)
+                    ExpenseItemCard(
+                        expense = expense,
+                        dateFormatter = dateFormatter,
+                        onDoubleClick = {          // ── NEW
+                            expenseToDelete = expense
+                            showDeleteDialog = true
+                        }
+                    )
                 }
 
                 item { Spacer(modifier = Modifier.height(32.dp)) }
             }
         }
+    }
+
+    // ── NEW: Delete Confirmation Dialog ──
+    if (showDeleteDialog && expenseToDelete != null) {
+        AlertDialog(
+            onDismissRequest = {
+                showDeleteDialog = false
+                expenseToDelete = null
+            },
+            title = {
+                Text(
+                    text = "Delete Expense",
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+            },
+            text = {
+                Text(
+                    text = "Are you sure you want to delete \"${expenseToDelete?.name}\"?",
+                    color = Color(0xFF64748B)
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        expenseToDelete?.let { viewModel.deleteExpense(it) }
+                        showDeleteDialog = false
+                        expenseToDelete = null
+                    }
+                ) {
+                    Text(
+                        text = "Delete",
+                        color = Color(0xFFEF4444),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        expenseToDelete = null
+                    }
+                ) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 
     // From Date Picker
@@ -377,7 +450,8 @@ fun ExpensesScreen(
 @Composable
 fun ExpenseItemCard(
     expense: Expense,
-    dateFormatter: SimpleDateFormat
+    dateFormatter: SimpleDateFormat,
+    onDoubleClick: () -> Unit = {}   // ── NEW parameter
 ) {
     val (icon, iconColor) = categoryIcons[expense.category]
         ?: (Icons.Outlined.Fastfood to Color(0xFF64748B))
@@ -385,6 +459,11 @@ fun ExpenseItemCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
+            .pointerInput(Unit) {          // ── NEW: double-tap detector
+                detectTapGestures(
+                    onDoubleTap = { onDoubleClick() }
+                )
+            }
             .shadow(
                 elevation = 2.dp,
                 shape = RoundedCornerShape(20.dp),

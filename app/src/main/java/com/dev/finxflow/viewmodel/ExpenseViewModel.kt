@@ -130,6 +130,12 @@ class ExpenseViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
+    fun deleteExpense(expense: Expense) {
+        viewModelScope.launch {
+            repository.deleteExpense(expense)
+        }
+    }
+
     fun clearExportMessage() {
         _expensesUiState.update { it.copy(exportMessage = null) }
     }
